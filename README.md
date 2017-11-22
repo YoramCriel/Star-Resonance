@@ -1,2 +1,2 @@
-# Star-Resonance-
+# Star Resonance
 Echo of connecting stars 
