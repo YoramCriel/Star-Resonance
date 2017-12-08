@@ -27,6 +27,8 @@ Wanneer de groepen met elkaar in contact komen, de lijnen kruisen elkaar zal
 er een geluidssignaal/effect ontstaan die afhankelijk is van de
 snelheid waarmee deze lijnen elkaar kruisen.
 
+Zie de visuele voorstelling in de map concept
+
 Overige extra functionaliteiten:
 
 Wij overwegen de lijnen in een 3d context weer te geven.
