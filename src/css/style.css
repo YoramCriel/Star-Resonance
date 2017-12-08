@@ -8,11 +8,19 @@ html {
 body {
   font-family: Roboto;
   font-size: 1.6rem;
-  margin: 2rem;
+  overflow-style: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
 }
 
 header {
-  margin: 2rem 0;
+  /*margin: 2rem 0;*/
 }
 
 h1 {
