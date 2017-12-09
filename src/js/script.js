@@ -7,7 +7,10 @@ let app;
 const Application = PIXI.Application,
   loader = PIXI.loader,
   //resources = PIXI.loader.resources,
-  Sprite = PIXI.Sprite;
+  Sprite = PIXI.Sprite,
+  Graphics = PIXI.Graphics,
+  Text = PIXI.Text,
+  TextStyle = PIXI.TextStyle;
   //Rectangle = PIXI.Rectangle,
   //TextureCache = PIXI.TextureCache;
 
@@ -23,7 +26,92 @@ const init = () => {
   setupPixi();
   rerenderAppCanvas();
   loadImages();
+
+
+  const rectangle = new Graphics(); //rectangle aanmaken
+  rectangle.beginFill(0x66CCFF); //kleur
+  rectangle.lineStyle(4, 0xFF3300, 1); // lijndikte, kleur, alpha
+  rectangle.drawRect(0, 0, 50, 50); // dementies
+  rectangle.endFill();// sluiten
+  rectangle.x = 170; // positioneren
+  app.stage.addChild(rectangle); // toevoegen aan de stage
+
+  const ellipse = new Graphics();
+  ellipse.beginFill(0xFFFF00);
+  ellipse.drawEllipse(0, 0, 50, 20);
+  ellipse.endFill();
+  ellipse.x = 180;
+  ellipse.y = 130;
+  app.stage.addChild(ellipse);
+
+  //let op ers staat een onzichtbaar vierkant onder, anchor punt links boven
+
+  const roundBox = new Graphics();
+  roundBox.lineStyle(4, 0x99CCFF, 1);
+  roundBox.beginFill(0xFF9933);
+  roundBox.drawRoundedRect(0, 0, 84, 36, 10); // laatste parameter is de radius
+  roundBox.endFill();
+  roundBox.x = 48;
+  roundBox.y = 190;
+  app.stage.addChild(roundBox);
+
+  const line = new Graphics();
+  line.lineStyle(4, 0xFFFFFF, 1);
+  line.moveTo(0, 0);
+  line.lineTo(80, 50);
+  line.x = 32;
+  line.y = 32;
+  app.stage.addChild(line);
+
+  const triangle = new Graphics();
+  triangle.beginFill(0x66FF33);
+
+  //Use `drawPolygon` to define the triangle as
+  //a path array of x/y positions
+
+  triangle.drawPolygon([
+    - 32, 64,             //First point
+    32, 64,              //Second point
+    0, 0                 //Third point
+  ]);
+
+  //Fill shape's color
+  triangle.endFill();
+
+  //Position the triangle after you've drawn it.
+  //The triangle's x/y position is anchored to its first point in the path
+  triangle.x = 180;
+  triangle.y = 22;
+
+  app.stage.addChild(triangle);
+
+  const message = new Text(`Hello Pixi!`);
+  app.stage.addChild(message);
+  message.position.set(54, 96); //unstyled text
+
+  //styled text
+  const style = new TextStyle({ //style object
+    fontFamily: `Arial`,
+    fontSize: 36,
+    fill: `white`,
+    stroke: `#ff3300`,
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowColor: `#000000`,
+    dropShadowBlur: 4,
+    dropShadowAngle: Math.PI / 6,
+    dropShadowDistance: 6,
+  });
+
+  const message2 = new Text(`Hello Pixi!`, style);
+  app.stage.addChild(message2);
+
+  let center;
+  message2.text = `Text changed!`; // tekst achteraf wijzigen
+  message2.style = {fill: `black`, font: `16px PetMe64`}; //stijl achteraf wijzigen
+  message2.style = {wordWrap: true, wordWrapWidth: 100, align: center}; //wrap text
 };
+
 
 //venster instellen
 const setupPixi = () => {
@@ -49,7 +137,6 @@ let sprite, state;
 
 const loadImages = () => {
   //images laden in de texture cache zodat ze kunnen gebruikt worden met openGL
-
   loader
     .add(`assets/img/player.png`)
     .add(`assets/img/charakter.png`)
@@ -73,65 +160,9 @@ const loadImages = () => {
     //app.stage.removeChild(sprite); // sprite verwijderen.
     sprite.visible = true; // omzichtbaar zitten is efficienter
 
-    const left = keyboard(37),
-      up = keyboard(38),
-      right = keyboard(39),
-      down = keyboard(40);
-
-    left.press = () => {
-      //Change the cat's velocity when the key is pressed
-      sprite.vx = - 5;
-      sprite.vy = 0;
-    };
-
-    //Left arrow key `release` method
-    left.release = () => {
-      //If the left arrow has been released, and the right arrow isn't down,
-      //and the sprite isn't moving vertically:
-      //Stop the sprite
-      if (!right.isDown && sprite.vy === 0) {
-        sprite.vx = 0;
-      }
-    };
-
-    //Up
-    up.press = () => {
-      sprite.vy = - 5;
-      sprite.vx = 0;
-    };
-    up.release = () => {
-      if (!down.isDown && sprite.vx === 0) {
-        sprite.vy = 0;
-      }
-    };
-
-    //Right
-    right.press = () => {
-      sprite.vx = 5;
-      sprite.vy = 0;
-    };
-    right.release = () => {
-      if (!left.isDown && sprite.vy === 0) {
-        sprite.vx = 0;
-      }
-    };
-
-    //Down
-    down.press = () => {
-      sprite.vy = 5;
-      sprite.vx = 0;
-    };
-    down.release = () => {
-      if (!up.isDown && sprite.vx === 0) {
-        sprite.vy = 0;
-      }
-    };
-
     state = play;
 
     app.ticker.add(delta => gameLoop(delta));
-
-
   }
 };
 
@@ -154,41 +185,5 @@ const loadProgressHandler = (loader, resource) => {
   console.log(`progress: ${  loader.progress  }%`);
 };
 
-const keyboard = keyCode => {
-  const key = {};
-  key.code = keyCode;
-  key.isDown = false;
-  key.isUp = true;
-  key.press = undefined;
-  key.release = undefined;
-  //The `downHandler`
-  key.downHandler = event => {
-    if (event.keyCode === key.code) {
-      if (key.isUp && key.press) key.press();
-      key.isDown = true;
-      key.isUp = false;
-    }
-    event.preventDefault();
-  };
-
-  //The `upHandler`
-  key.upHandler = event => {
-    if (event.keyCode === key.code) {
-      if (key.isDown && key.release) key.release();
-      key.isDown = false;
-      key.isUp = true;
-    }
-    event.preventDefault();
-  };
-
-  //Attach event listeners
-  window.addEventListener(
-    `keydown`, key.downHandler.bind(key), false
-  );
-  window.addEventListener(
-    `keyup`, key.upHandler.bind(key), false
-  );
-  return key;
-};
 
 init();
