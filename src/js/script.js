@@ -3,6 +3,12 @@ const Tone = require(`tone`),
 
 let app;
 
+//pixi alliassen
+const Application = PIXI.Application,
+  loader = PIXI.loader,
+  //resources = PIXI.loader.resources,
+  Sprite = PIXI.Sprite;
+
 const init = () => {
 
   const player = new Tone.Player({
@@ -14,11 +20,14 @@ const init = () => {
   player.toMaster();
   setupPixi();
   rerenderAppCanvas();
+  loadImages();
+
 
 };
 
 const setupPixi = () => {
-  app = new PIXI.Application({
+
+  app = new Application({
     width: window.innerWidth,
     height: window.innerHeight,
     antialiasing: true,
@@ -33,6 +42,24 @@ const rerenderAppCanvas = () => {
   window.addEventListener(`resize`, function() {
     app.renderer.resize(window.innerWidth, window.innerHeight);
   });
+};
+
+
+
+const loadImages = () => {
+  //images laden in de texture cache zodat ze kunnen gebruikt worden met openGL
+  loader
+    .add(`assets/img/player.png`)
+    .load(setup);
+
+  function setup() {
+    const sprite = new Sprite(
+    loader.resources[`assets/img/player.png`].texture
+    );
+    app.stage.addChild(sprite); // sprite op het scherm zetten
+    //app.stage.removeChild(sprite); // sprite verwijderen.
+    sprite.visible = true; // omzichtbaar zitten is efficienter
+  }
 };
 
 init();
