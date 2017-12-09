@@ -22,7 +22,6 @@ const init = () => {
   rerenderAppCanvas();
   loadImages();
 
-
 };
 
 const setupPixi = () => {
@@ -48,12 +47,16 @@ const rerenderAppCanvas = () => {
 
 const loadImages = () => {
   //images laden in de texture cache zodat ze kunnen gebruikt worden met openGL
+  let sprite;
+
   loader
     .add(`assets/img/player.png`)
-    .load(setup);
+    .load(setup)
+    .on(`progress`, loadProgressHandler);
 
   function setup() {
-    const sprite = new Sprite(
+    console.log(`All files loaded`);
+    sprite = new Sprite(
     loader.resources[`assets/img/player.png`].texture
     );
     app.stage.addChild(sprite); // sprite op het scherm zetten
@@ -61,5 +64,18 @@ const loadImages = () => {
     sprite.visible = true; // omzichtbaar zitten is efficienter
   }
 };
+
+const loadProgressHandler = (loader, resource) => {
+  //Display the file `url` currently being loaded
+  console.log(`loading: ${  resource.url}`);
+
+    //Display the percentage of files currently loaded
+  console.log(`progress: ${  loader.progress  }%`);
+
+    //If you gave your files names as the first argument
+    //of the `add` method, you can access them like this
+    //console.log("loading: " + resource.name);
+};
+
 
 init();
