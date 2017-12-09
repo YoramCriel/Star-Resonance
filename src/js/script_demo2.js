@@ -1,31 +1,33 @@
+//Demo 2 Game states
+
 const Tone = require(`tone`),
   PIXI = require (`pixi.js`);
 
-let app;
+let app; // Globale variable app
 
-//pixi alliassen
+//Pixi alliassen
 const Application = PIXI.Application,
   loader = PIXI.loader,
-  //resources = PIXI.loader.resources,
   Sprite = PIXI.Sprite;
-  //Rectangle = PIXI.Rectangle,
-  //TextureCache = PIXI.TextureCache;
 
 const init = () => {
 
+//------------Tone.js-----------------------------
   const player = new Tone.Player({
     url: `assets/audio/Main_song.m4a`,
     autostart: true,
     loop: true,
   });
-
   player.toMaster();
-  setupPixi();
+
+//--------------------------------------------------
+
+  setupPixi(); //Venster instellen
   rerenderAppCanvas();
   loadImages();
 };
 
-//venster instellen
+//Venster instellen
 const setupPixi = () => {
   app = new Application({
     width: window.innerWidth,
@@ -37,7 +39,7 @@ const setupPixi = () => {
   document.body.appendChild(app.view);
 };
 
-// zorgen dat de grote aangepast wordt wanneer het venster in grote veranderd
+// Hier zorg ik dat de grote aangepast wordt wanneer het venster in grote veranderd
 const rerenderAppCanvas = () => {
   window.addEventListener(`resize`, function() {
     app.renderer.resize(window.innerWidth, window.innerHeight);
@@ -48,7 +50,7 @@ const rerenderAppCanvas = () => {
 let sprite, state;
 
 const loadImages = () => {
-  //images laden in de texture cache zodat ze kunnen gebruikt worden met openGL
+  //Images laden in de texture cache zodat ze kunnen gebruikt worden met openGL
 
   loader
     .add(`assets/img/player.png`)
@@ -58,27 +60,25 @@ const loadImages = () => {
 
   function setup() {
     console.log(`All files loaded`);
-    sprite = new Sprite(
-    loader.resources[`assets/img/player.png`].texture
-    );
-    sprite.position.set(96, 96);
+    //Gewone afbeelding inladen
+    sprite = new Sprite(loader.resources[`assets/img/player.png`].texture);
+    sprite.position.set(96, 96); //Sprite instellingen.
     sprite.width = 80;
     sprite.height = 120;
     sprite.scale.set(0.5, 0.5);
     sprite.rotation = 0.5;
     sprite.anchor.set(0.5, 0.5);
-    app.stage.addChild(sprite); // sprite op het scherm zetten
-    //app.stage.removeChild(sprite); // sprite verwijderen.
-    sprite.visible = true; // omzichtbaar zitten is efficienter
+    app.stage.addChild(sprite); // Sprite op het scherm zetten
+    //app.stage.removeChild(sprite); // Sprite verwijderen.
+    sprite.visible = true; // Onzichtbaar zitten is efficienter
 
-    state = play;
+    state = play; //State instellem
 
-    app.ticker.add(delta => gameLoop(delta));
+    app.ticker.add(delta => gameLoop(delta));  // 60x loop aanmaken
   }
 };
 
 const gameLoop = delta => {
-
   //Update the current game state:
   state(delta);
 };
@@ -88,54 +88,12 @@ const play = delta => {
   //Move the cat 1 pixel to the right each frame
   sprite.vx = 1;
   sprite.x += sprite.vx;
+
 };
-
-
-const keyboard = keyCode => {
-  const key = {};
-  key.code = keyCode;
-  key.isDown = false;
-  key.isUp = true;
-  key.press = undefined;
-  key.release = undefined;
-  //The `downHandler`
-  key.downHandler = event => {
-    if (event.keyCode === key.code) {
-      if (key.isUp && key.press) key.press();
-      key.isDown = true;
-      key.isUp = false;
-    }
-    event.preventDefault();
-  };
-
-  //The `upHandler`
-  key.upHandler = event => {
-    if (event.keyCode === key.code) {
-      if (key.isDown && key.release) key.release();
-      key.isDown = false;
-      key.isUp = true;
-    }
-    event.preventDefault();
-  };
-
-  //Attach event listeners
-  window.addEventListener(
-    `keydown`, key.downHandler.bind(key), false
-  );
-  window.addEventListener(
-    `keyup`, key.upHandler.bind(key), false
-  );
-  return key;
-};
-
-
-
-
 
 const loadProgressHandler = (loader, resource) => {
   console.log(`loading: ${  resource.url}`);
   console.log(`progress: ${  loader.progress  }%`);
 };
-
 
 init();
