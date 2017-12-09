@@ -7,9 +7,9 @@ let app;
 const Application = PIXI.Application,
   loader = PIXI.loader,
   //resources = PIXI.loader.resources,
-  Sprite = PIXI.Sprite;
-  //Rectangle = PIXI.Rectangle,
-  //TextureCache = PIXI.TextureCache;
+  Sprite = PIXI.Sprite,
+  Rectangle = PIXI.Rectangle,
+  TextureCache = PIXI.TextureCache;
 
 const init = () => {
 
@@ -46,10 +46,11 @@ const rerenderAppCanvas = () => {
 };
 
 
-let sprite, state;
+let charakter;
 
 const loadImages = () => {
   //images laden in de texture cache zodat ze kunnen gebruikt worden met openGL
+  let sprite;
 
   loader
     .add(`assets/img/player.png`)
@@ -72,29 +73,42 @@ const loadImages = () => {
     //app.stage.removeChild(sprite); // sprite verwijderen.
     sprite.visible = true; // omzichtbaar zitten is efficienter
 
-    state = play;
-
+    const texture = TextureCache[`assets/img/charakter.png`];
+    const rectangle = new Rectangle(0, 0, 89, 165);
+    texture.frame = rectangle;
+    charakter = new Sprite(texture);
+    charakter.position.set(500, 500);
+    charakter.vx = 0;
+    charakter.vy = 0;
+    app.stage.addChild(charakter);
+    app.renderer.render(app.stage);
     app.ticker.add(delta => gameLoop(delta));
+
   }
 };
 
+//gaat ook met requestAnimationFrame(gameLoop);
 const gameLoop = delta => {
-
-  //Update the current game state:
-  state(delta);
-};
-
-const play = delta => {
   console.log(delta);
-  //Move the cat 1 pixel to the right each frame
-  sprite.vx = 1;
-  sprite.x += sprite.vx;
+  //Move the cat 1 pixel
+  // charakter.x += 1 + delta;
+  // charakter.y -= 0.4 + delta;
+  charakter.vx = 1;
+  charakter.vy = 1;
+  charakter.x += charakter.vx;
+  charakter.y += charakter.vy;
 };
 
 
 const loadProgressHandler = (loader, resource) => {
+    //Display the file `url` currently being loaded
   console.log(`loading: ${  resource.url}`);
+    //Display the percentage of files currently loaded
   console.log(`progress: ${  loader.progress  }%`);
+
+    //If you gave your files names as the first argument
+    //of the `add` method, you can access them like this
+    //console.log("loading: " + resource.name);
 };
 
 
