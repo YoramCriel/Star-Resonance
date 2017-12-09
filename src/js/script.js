@@ -78,6 +78,8 @@ const loadImages = () => {
     texture.frame = rectangle;
     charakter = new Sprite(texture);
     charakter.position.set(500, 500);
+    charakter.vx = 0;
+    charakter.vy = 0;
     app.stage.addChild(charakter);
     app.renderer.render(app.stage);
     app.ticker.add(delta => gameLoop(delta));
@@ -89,7 +91,12 @@ const loadImages = () => {
 const gameLoop = delta => {
   console.log(delta);
   //Move the cat 1 pixel
-  charakter.x += 1 + delta;
+  // charakter.x += 1 + delta;
+  // charakter.y -= 0.4 + delta;
+  charakter.vx = 1;
+  charakter.vy = 1;
+  charakter.x += charakter.vx;
+  charakter.y += charakter.vy;
 };
 
 
