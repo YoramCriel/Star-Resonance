@@ -6,34 +6,14 @@ const Application = PIXI.Application,
 let app;
 // holder to store the aliens
 const aliens = [];
-const totalDudes = 20;
-
 
 const init = () => {
 
   setupPixiApp();
   backgroundImage();
-  //window.addEventListener(`click`, clickHandler);
+  window.addEventListener(`click`, clickHandler);
 
-  for (let i = 0;i < totalDudes;i ++) {
 
-    // create a new Sprite that uses the image name that we just generated as its source
-    const ellipse = new Graphics(); //Cirkel aanmaken
-    ellipse.beginFill(0xFFFF00);
-    ellipse.drawEllipse(0, 0, 50, 50);
-    ellipse.endFill();
-    //ellipse.anchor.set(0.5);
-    ellipse.scale.set(0.8 + Math.random() * 0.3);
-    ellipse.x = Math.random() * app.renderer.width;
-    ellipse.y = Math.random() * app.renderer.height;
-    ellipse.tint = Math.random() * 0xFFFFFF;
-    ellipse.direction = Math.random() * Math.PI * 2;
-    ellipse.turningSpeed = Math.random() - 0.8;
-    ellipse.speed = 2 + Math.random() * 2;
-    aliens.push(ellipse);
-    app.stage.addChild(ellipse);
-
-  }
   const ellipseBoundsPadding = 100;
   const ellipseBounds = new PIXI.Rectangle(- ellipseBoundsPadding,
                                     - ellipseBoundsPadding,
@@ -68,20 +48,30 @@ const init = () => {
     }
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   backgroundAudio();
+};
+
+const clickHandler = () => {
+
+
+  // create a new Sprite that uses the image name that we just generated as its source
+  const ellipse = new Graphics(); //Cirkel aanmaken
+  ellipse.beginFill(0xFFFF00);
+  ellipse.drawEllipse(0, 0, 50, 50);
+  ellipse.endFill();
+  //ellipse.anchor.set(0.5);
+  ellipse.scale.set(0.8 + Math.random() * 0.3);
+  ellipse.x = Math.random() * app.renderer.width;
+  ellipse.y = Math.random() * app.renderer.height;
+  ellipse.tint = Math.random() * 0xFFFFFF;
+  ellipse.direction = Math.random() * Math.PI * 2;
+  ellipse.turningSpeed = Math.random() - 0.8;
+  ellipse.speed = 2 + Math.random() * 2;
+  aliens.push(ellipse);
+  app.stage.addChild(ellipse);
+
+
+
 };
 
 // const clickHandler = e => {
