@@ -4,54 +4,112 @@ const Tone = require(`tone`),
 const Application = PIXI.Application,
   Graphics = PIXI.Graphics;
 let app;
+// holder to store the aliens
+const aliens = [];
+const totalDudes = 20;
+
 
 const init = () => {
 
   setupPixiApp();
   backgroundImage();
+  //window.addEventListener(`click`, clickHandler);
 
-  window.addEventListener(`click`, onClick);
+  for (let i = 0;i < totalDudes;i ++) {
+
+    // create a new Sprite that uses the image name that we just generated as its source
+    const ellipse = new Graphics(); //Cirkel aanmaken
+    ellipse.beginFill(0xFFFF00);
+    ellipse.drawEllipse(0, 0, 50, 50);
+    ellipse.endFill();
+    //ellipse.anchor.set(0.5);
+    ellipse.scale.set(0.8 + Math.random() * 0.3);
+    ellipse.x = Math.random() * app.renderer.width;
+    ellipse.y = Math.random() * app.renderer.height;
+    ellipse.tint = Math.random() * 0xFFFFFF;
+    ellipse.direction = Math.random() * Math.PI * 2;
+    ellipse.turningSpeed = Math.random() - 0.8;
+    ellipse.speed = 2 + Math.random() * 2;
+    aliens.push(ellipse);
+    app.stage.addChild(ellipse);
+
+  }
+  const ellipseBoundsPadding = 100;
+  const ellipseBounds = new PIXI.Rectangle(- ellipseBoundsPadding,
+                                    - ellipseBoundsPadding,
+                                    app.renderer.width + ellipseBoundsPadding * 2,
+                                    app.renderer.height + ellipseBoundsPadding * 2);
+
+  app.ticker.add(function() {
+
+    // iterate through the ellipses and update their position
+    for (let i = 0;i < aliens.length;i ++) {
+
+      const ellipse = aliens[i];
+      ellipse.direction += ellipse.turningSpeed * 0.01;
+      ellipse.x += Math.sin(ellipse.direction) * ellipse.speed;
+      ellipse.y += Math.cos(ellipse.direction) * ellipse.speed;
+      ellipse.rotation = - ellipse.direction - Math.PI / 2;
+
+        // wrap the ellipses by testing their bounds...
+      if (ellipse.x < ellipseBounds.x) {
+        ellipse.x += ellipseBounds.width;
+      }
+      else if (ellipse.x > ellipseBounds.x + ellipseBounds.width) {
+        ellipse.x -= ellipseBounds.width;
+      }
+
+      if (ellipse.y < ellipseBounds.y) {
+        ellipse.y += ellipseBounds.height;
+      }
+      else if (ellipse.y > ellipseBounds.y + ellipseBounds.height) {
+        ellipse.y -= ellipseBounds.height;
+      }
+    }
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   backgroundAudio();
 };
 
+// const clickHandler = e => {
+//   createEllipse(e.clientX, e.clientY);
+// };
+//
+// let ellipse;
+//
+// const createEllipse = (x, y) => {
+//   ellipse = new Graphics(); //Cirkel aanmaken
+//   ellipse.beginFill(0xFFFF00);
+//   ellipse.drawEllipse(0, 0, 50, 50);
+//   ellipse.endFill();
+//   ellipse.x = x;
+//   ellipse.y = y;
+//   ellipse.vx = 0;
+//   ellipse.vy = 0;
+//   app.stage.addChild(ellipse);
+//
+//   app.ticker.add(function () {
+//     ellipse.vx = 1; //Velocity
+//     ellipse.vy = 1;
+//     ellipse.x += ellipse.vx;
+//     ellipse.y += ellipse.vy;
+//
+//   });
+// };
 
-let ellipse;
-const ellipsen = [];
-const drawElipse = (x, y) => {
-  ellipse = new Graphics(); //Cirkel aanmaken
-  ellipse.beginFill(0xFFFF00);
-  ellipse.drawEllipse(0, 0, 5, 5);
-  ellipse.endFill();
-  ellipse.x = x;
-  ellipse.y = y;
-  ellipse.vx = 0;
-  ellipse.vy = 0;
-
-  ellipsen.push(ellipse);
-  drawAllEllipses();
-  app.ticker.add(delta => gameLoop(delta));
-};
-
-const gameLoop = () => {
-  ellipse.vx = 1; //Velocity
-  ellipse.vy = 1;
-  ellipse.x += ellipse.vx;
-  ellipse.y += ellipse.vy;
-  //Update the current game state:
-
-};
-
-const drawAllEllipses = () => {
-  console.log(`test`);
-  for (let i = 0;i < ellipsen.length;i ++) {
-    app.stage.addChild(ellipsen[i]);
-  }
-};
-
-const onClick = e => {
-  console.log(e);
-  drawElipse(e.clientX, e.clientY);
-};
 
 const backgroundImage = () => {
   const texture = PIXI.Texture.fromImage(`assets/img/stars3.jpg`);
