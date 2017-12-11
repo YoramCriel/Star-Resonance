@@ -20,55 +20,43 @@ const init = () => {
                                     app.renderer.height + ellipseBoundsPadding * 2);
 
   app.ticker.add(() => {
-
     // iterate through the ellipses and update their position
     ellipses.forEach((ellipse, i) => {
-      //console.log(ellipse);
-      console.log(i);
+      //console.log(i);
 
-
-    //for (let i = 0;i < ellipses.length;i ++) {
-      //console.log(ellipses);
-      //console.log(ellipses[i]);
-      // console.log(i);
-      // console.log(app.stage.children);
       ellipse.direction += ellipse.turningSpeed * 0.01;
       ellipse.x += Math.sin(ellipse.direction) * ellipse.speed;
       ellipse.y += Math.cos(ellipse.direction) * ellipse.speed;
       //ellipse.rotation = - ellipse.direction - Math.PI / 2;
 
-        // wrap the ellipses by testing their bounds...
+      // wrap the ellipses by testing their bounds...
       if (ellipse.x < ellipseBounds.x) {
         ellipse.x += ellipseBounds.width;
         app.stage.removeChild(ellipse);
-        playSound();
-        ellipses.splice(i);
-        console.log(ellipses.length);
+        audioEffect();
+        ellipses.splice(i, 1);
         console.log(`left`);
       }
       else if (ellipse.x > ellipseBounds.x + ellipseBounds.width) {
         ellipse.x -= ellipseBounds.width;
         app.stage.removeChild(ellipse);
-        playSound();
-        ellipses.splice(i);
-        console.log(ellipses.length);
+        audioEffect();
+        ellipses.splice(i, 1);
         console.log(`right`);
       }
 
       if (ellipse.y < ellipseBounds.y) {
         ellipse.y += ellipseBounds.height;
         app.stage.removeChild(ellipse);
-        playSound();
-        ellipses.splice(i);
-        console.log(ellipses.length);
+        audioEffect();
+        ellipses.splice(i, 1);
         console.log(`top`);
       }
       else if (ellipse.y > ellipseBounds.y + ellipseBounds.height) {
         ellipse.y -= ellipseBounds.height;
         app.stage.removeChild(ellipse);
-        playSound();
-        ellipses.splice(i);
-        console.log(ellipses.length);
+        audioEffect();
+        ellipses.splice(i, 1);
         console.log(`bottom`);
       }
     });
@@ -141,14 +129,14 @@ const setupPixiApp = () => {
   rerenderAppCanvas();
 };
 
-const playSound = () => {
-  console.log(`play`);
-  const player = new Tone.Player({
-    url: `assets/audio/Sound1.m4a`,
+const audioEffect = () => {
+  const randomSong = Math.floor(Math.random() * 6 + 1);
+  const effectPlayer = new Tone.Player({
+    url: `assets/audio/Sound${randomSong}.m4a`,
     autostart: true,
   });
 
-  player.toMaster();
+  effectPlayer.toMaster();
 };
 
 
@@ -162,13 +150,13 @@ const rerenderAppCanvas = () => {
 
 const backgroundAudio = () => {
 
-  const player1 = new Tone.Player({
+  const backgroundPlayer = new Tone.Player({
     url: `assets/audio/Main_song.m4a`,
     autostart: true,
     loop: true,
   });
 
-  player1.toMaster();
+  backgroundPlayer.toMaster();
 
 };
 
