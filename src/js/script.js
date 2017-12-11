@@ -19,15 +19,19 @@ const init = () => {
                                     app.renderer.width + ellipseBoundsPadding * 2,
                                     app.renderer.height + ellipseBoundsPadding * 2);
 
-  app.ticker.add(function() {
+  app.ticker.add(() => {
 
     // iterate through the ellipses and update their position
-    for (let i = 0;i < ellipses.length;i ++) {
+    ellipses.forEach((ellipse, i) => {
+      //console.log(ellipse);
+      console.log(i);
+
+
+    //for (let i = 0;i < ellipses.length;i ++) {
       //console.log(ellipses);
       //console.log(ellipses[i]);
       // console.log(i);
       // console.log(app.stage.children);
-      const ellipse = ellipses[i];
       ellipse.direction += ellipse.turningSpeed * 0.01;
       ellipse.x += Math.sin(ellipse.direction) * ellipse.speed;
       ellipse.y += Math.cos(ellipse.direction) * ellipse.speed;
@@ -38,7 +42,6 @@ const init = () => {
         ellipse.x += ellipseBounds.width;
         app.stage.removeChild(ellipse);
         playSound();
-        console.log(`test`);
         ellipses.splice(i);
         console.log(ellipses.length);
         console.log(`left`);
@@ -47,7 +50,6 @@ const init = () => {
         ellipse.x -= ellipseBounds.width;
         app.stage.removeChild(ellipse);
         playSound();
-        console.log(`test`);
         ellipses.splice(i);
         console.log(ellipses.length);
         console.log(`right`);
@@ -57,7 +59,6 @@ const init = () => {
         ellipse.y += ellipseBounds.height;
         app.stage.removeChild(ellipse);
         playSound();
-        console.log(`test`);
         ellipses.splice(i);
         console.log(ellipses.length);
         console.log(`top`);
@@ -66,12 +67,11 @@ const init = () => {
         ellipse.y -= ellipseBounds.height;
         app.stage.removeChild(ellipse);
         playSound();
-        console.log(`test`);
         ellipses.splice(i);
         console.log(ellipses.length);
         console.log(`bottom`);
       }
-    }
+    });
   });
 
   backgroundAudio();
@@ -107,15 +107,11 @@ const backgroundImage = () => {
 
   app.ticker.add(function () {
 
-    // count += 0.005;
-
     tilingSprite.tileScale.x = 2 + Math.sin(count);
     tilingSprite.tileScale.y = 2 + Math.cos(count);
 
     tilingSprite.tilePosition.x += 1;
     tilingSprite.tilePosition.y += 1;
-    console.log(count);
-    console.log(countingDown);
 
     if (count > 10) {
       countingDown = true;
