@@ -6,6 +6,7 @@ const Application = PIXI.Application,
 let app;
 // holder to store the aliens
 const ellipses = [];
+let bounds = [];
 
 const init = () => {
 
@@ -20,8 +21,10 @@ const init = () => {
                                     app.renderer.height + ellipseBoundsPadding * 2);
 
   app.ticker.add(() => {
+    bounds = [];
     // iterate through the ellipses and update their position
     ellipses.forEach((ellipse, i) => {
+
       //console.log(i);
 
       ellipse.direction += ellipse.turningSpeed * 0.01;
@@ -52,6 +55,7 @@ const init = () => {
         ellipses.splice(i, 1);
         console.log(`top`);
       }
+
       else if (ellipse.y > ellipseBounds.y + ellipseBounds.height) {
         ellipse.y -= ellipseBounds.height;
         app.stage.removeChild(ellipse);
@@ -59,7 +63,27 @@ const init = () => {
         ellipses.splice(i, 1);
         console.log(`bottom`);
       }
+
+
+      bounds.push(ellipse.getBounds());
+
     });
+    // console.log(bounds);
+    //
+    // bounds.forEach(bound => {
+    //   console.log(bound);
+    // });
+    // ellipses.forEach(ellipse => {
+    //   const bounds1 = ellipse.getBounds();
+    //   ellipses.forEach(ellipse2 => {
+    //     const bounds2 = ellipse2.getBounds();
+    //     console.log(`bounds1`, bounds1);
+    //     console.log(`bounds2`, bounds2);
+    //     if (bounds1.x === bounds2.x) {
+    //       console.log(`hitted`);
+    //     }
+    //   });
+    // });
   });
 
   backgroundAudio();
@@ -139,14 +163,12 @@ const audioEffect = () => {
   effectPlayer.toMaster();
 };
 
-
 // Er voor zorgen dat de grote aangepast wordt wanneer het venster in grote veranderd
 const rerenderAppCanvas = () => {
   window.addEventListener(`resize`, function() {
     app.renderer.resize(window.innerWidth, window.innerHeight);
   });
 };
-
 
 const backgroundAudio = () => {
 
