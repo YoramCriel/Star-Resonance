@@ -7,11 +7,34 @@ let app;
 // holder to store the aliens
 const ellipses = [];
 let bounds = [];
+let mute, notmuted;
 
 const init = () => {
-
   setupPixiApp();
   backgroundImage();
+
+  mute = PIXI.Sprite.fromImage(`assets/img/mute.png`);
+  mute.width = 60;
+  mute.height = 60;
+  mute.position.set(app.renderer.width - mute.width - 20, app.renderer.height - mute.height - 20);
+  mute.interactive = true;
+  mute.buttonMode = true;
+  mute.visible = false;
+  mute.on(`pointerdown`, down);
+  app.stage.addChild(mute);
+
+  notmuted = PIXI.Sprite.fromImage(`assets/img/notmuted.png`);
+  notmuted.width = 60;
+  notmuted.height = 60;
+  notmuted.position.set(app.renderer.width -  notmuted.width - 20, app.renderer.height -  notmuted.height - 20);
+  notmuted.interactive = true;
+  notmuted.buttonMode = true;
+  notmuted.visible = true;
+  notmuted.on(`pointerdown`, down);
+  app.stage.addChild(notmuted);
+
+  backgroundAudio();
+
   window.addEventListener(`click`, clickHandler);
 
   const ellipseBoundsPadding = 100;
@@ -64,7 +87,6 @@ const init = () => {
         console.log(`bottom`);
       }
 
-
       bounds.push(ellipse.getBounds());
 
     });
@@ -85,12 +107,10 @@ const init = () => {
     //   });
     // });
   });
-
-  backgroundAudio();
 };
 
-const clickHandler = e => {
 
+const clickHandler = e => {
 
   // create a new Sprite that uses the image name that we just generated as its source
   const ellipse = new Graphics(); //Cirkel aanmaken
@@ -170,15 +190,36 @@ const rerenderAppCanvas = () => {
   });
 };
 
+let backgroundPlayer;
+
 const backgroundAudio = () => {
 
-  const backgroundPlayer = new Tone.Player({
+  backgroundPlayer = new Tone.Player({
     url: `assets/audio/Main_song.m4a`,
     autostart: true,
     loop: true,
   });
 
   backgroundPlayer.toMaster();
+
+};
+
+let muted = false;
+const down = () => {
+
+  if (muted === true) {
+    backgroundPlayer.mute = true;
+    muted = false;
+    console.log(`1`);
+    mute.visible = false;
+    notmuted.visible = true;
+  } else if (muted === false) {
+    backgroundPlayer.mute = false;
+    muted = true;
+    console.log(`2`);
+    notmuted.visible = false;
+    mute.visible = true;
+  }
 
 };
 
