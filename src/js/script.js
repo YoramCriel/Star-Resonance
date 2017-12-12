@@ -112,6 +112,10 @@ const init = () => {
 
 const clickHandler = e => {
 
+  if (e.clientX > app.renderer.width -  notmuted.width - 20 && e.clientX > app.renderer.height) {
+    return;
+  }
+
   // create a new Sprite that uses the image name that we just generated as its source
   const ellipse = new Graphics(); //Cirkel aanmaken
   ellipse.beginFill(0xFFFF00);
@@ -204,21 +208,22 @@ const backgroundAudio = () => {
 
 };
 
-let muted = false;
+let muted = true;
 const down = () => {
 
   if (muted === true) {
     backgroundPlayer.mute = true;
     muted = false;
     console.log(`1`);
-    mute.visible = false;
-    notmuted.visible = true;
+    notmuted.visible = false;
+    mute.visible = true;
+
   } else if (muted === false) {
     backgroundPlayer.mute = false;
     muted = true;
     console.log(`2`);
-    notmuted.visible = false;
-    mute.visible = true;
+    mute.visible = false;
+    notmuted.visible = true;
   }
 
 };
