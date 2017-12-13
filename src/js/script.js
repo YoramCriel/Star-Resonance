@@ -5,6 +5,8 @@ const Application = PIXI.Application,
   Graphics = PIXI.Graphics;
 
 const ellipses = [];
+const particles = [];
+const lines = [];
 
 let app;
 const bounds = [];
@@ -16,81 +18,121 @@ const init = () => {
   drawMuteIcons();
   window.addEventListener(`click`, drawEllipse);
   circleOuterBoxCollision();
+  // drawEllipse();
+  drawParticles();
   backgroundAudio();
 };
 
+const drawParticles = () => {
+  console.log(`Draw particles`);
+  // if (ellipses.length > 0) {
+    // ellipses.forEach(el => {
+  // console.log(el);
+  // for (let i = 50;i < 50;i ++) {
+  //   drawParticle();
+  // }
+    // });
+  // }
+};
+
 const circleOuterBoxCollision = () => {
-  const ellipseBoundsPadding = 100; //collision kader instellen (Het volledige canvas)
-  const ellipseBounds = new PIXI.Rectangle(- ellipseBoundsPadding,
-                                    - ellipseBoundsPadding,
-                                    app.renderer.width + ellipseBoundsPadding * 2,
-                                    app.renderer.height + ellipseBoundsPadding * 2);
+  const ellipseBoundsPadding = 100; //collision kader instellen
+  const ellipseBounds = new PIXI.Rectangle(
+    - ellipseBoundsPadding,
+    - ellipseBoundsPadding,
+    app.renderer.width + ellipseBoundsPadding * 2,
+    app.renderer.height + ellipseBoundsPadding * 2);
+  console.log(`circleOuterBox`);
+  console.log(`ellipses:`, ellipses);
+
+  // let c = 0;
 
   app.ticker.add(() => {
+    // c ++;
+    // if (c === 10) return;
     // bounds = [];
     // iterate through the ellipses and update their position
-    ellipses.forEach((ellipse, i) => {
 
-      //console.log(i);
+    for (let i = 0;i < ellipses.length;i ++) {
+
+      const ellipse = ellipses[i];
+      let prevEllipse = null;
+      if (i > 0) {
+        prevEllipse = ellipses[i - 1];
+      }
+
+    // console.log(`ellipse.getBounds():`, ellipse.getBounds());
 
       ellipse.direction += ellipse.turningSpeed * 0.01;
       ellipse.x += Math.sin(ellipse.direction) * ellipse.speed;
       ellipse.y += Math.cos(ellipse.direction) * ellipse.speed;
-      //ellipse.rotation = - ellipse.direction - Math.PI / 2;
+      ellipse.rotation = - ellipse.direction - Math.PI / 2;
 
-      //Controleer of er collision is
-      //Left
+      for (let y = 0;y < lines.length;y ++) {
+        const particle = particles[y];
+        particle.direction += particle.turningSpeed * 0.1;
+        particle.x += Math.sin(particle.direction) * particle.speed;
+        particle.y += Math.cos(particle.direction) * particle.speed;
+
+        const line = lines[y];
+        // line.moveTo(particle.x, particle.y);
+        // line.lineTo(particle.x, particle.y);
+        // line.position.set(particle.x, particle.y);
+        // line.moveTo(particle.x, particle.y);
+        // line.lineTo(ellipse.x, ellipse.y);
+        line.x = ellipse.x;
+        line.y = ellipse.y;
+      }
+
+      // console.log(`ellipse.x, ellipse.y:`, ellipse.x, ellipse.y);
+
+      if (prevEllipse !== null) {
+        if (ellipse.x + (ellipse.width / 2) > prevEllipse.x - (prevEllipse.width / 2) &&
+        ellipse.x - (ellipse.width / 2) < prevEllipse.x + (prevEllipse.width / 2) &&
+        ellipse.y + (ellipse.height / 2) > prevEllipse.y - (prevEllipse.height / 2) &&
+        ellipse.y - (ellipse.height / 2) < prevEllipse.y + (prevEllipse.height / 2)
+      ) {
+          audioEffect();
+          console.log(`Collided`);
+        }
+      }
+
+    //Controleer of er collision is
+    //Left
       if (ellipse.x < ellipseBounds.x) {
         ellipse.x += ellipseBounds.width;
         app.stage.removeChild(ellipse);
-        audioEffect();
+      // audioEffect();
         ellipses.splice(i, 1);
-        console.log(`left`);
+      // console.log(`left`);
       }
-      //Right
+    //Right
       else if (ellipse.x > ellipseBounds.x + ellipseBounds.width) {
         ellipse.x -= ellipseBounds.width;
         app.stage.removeChild(ellipse);
-        audioEffect();
+      // audioEffect();
         ellipses.splice(i, 1);
-        console.log(`right`);
+      // console.log(`right`);
       }
-      //Top
+    //Top
       if (ellipse.y < ellipseBounds.y) {
         ellipse.y += ellipseBounds.height;
         app.stage.removeChild(ellipse);
-        audioEffect();
+      // audioEffect();
         ellipses.splice(i, 1);
-        console.log(`top`);
+      // console.log(`top`);
       }
-      //Bottom
+    //Bottom
       else if (ellipse.y > ellipseBounds.y + ellipseBounds.height) {
         ellipse.y -= ellipseBounds.height;
         app.stage.removeChild(ellipse);
-        audioEffect();
+      // audioEffect();
         ellipses.splice(i, 1);
-        console.log(`bottom`);
+      // console.log(`bottom`);
       }
 
       bounds.push(ellipse.getBounds());
-
-    });
-    // console.log(bounds);
-    //
-    // bounds.forEach(bound => {
-    //   console.log(bound);
-    // });
-    // ellipses.forEach(ellipse => {
-    //   const bounds1 = ellipse.getBounds();
-    //   ellipses.forEach(ellipse2 => {
-    //     const bounds2 = ellipse2.getBounds();
-    //     console.log(`bounds1`, bounds1);
-    //     console.log(`bounds2`, bounds2);
-    //     if (bounds1.x === bounds2.x) {
-    //       console.log(`hitted`);
-    //     }
-    //   });
-    // });
+    }
   });
 };
 
@@ -104,19 +146,50 @@ const drawEllipse = e => {
   //Cirkel aanmaken
   const ellipse = new Graphics();
   ellipse.beginFill(0xFFFF00);
-  ellipse.drawEllipse(0, 0, 50, 50);
+  ellipse.drawEllipse(0, 0, 15, 15);
   ellipse.endFill();
-  ellipse.scale.set(0.8 + Math.random() * 0.3);
+  // ellipse.scale.set(0.8 + Math.random() * 0.3);
   ellipse.x = e.clientX;
+  // ellipse.x = 500;
   ellipse.y = e.clientY;
+  // ellipse.y = 500;
   ellipse.tint = Math.random() * 0xFFFFFF;
   ellipse.direction = Math.random() * Math.PI * 2;
   ellipse.turningSpeed = Math.random() - 0.8;
   ellipse.speed = 2 + Math.random() * 2;
   ellipses.push(ellipse);
   app.stage.addChild(ellipse);
+
+  for (let i = 0;i < 50;i ++) {
+    drawParticle(ellipse.x, ellipse.y);
+  }
 };
 
+const drawParticle = (mainStarX, mainStarY) => {
+  const ellipse = new Graphics();
+  ellipse.beginFill(0xFFFF00);
+  ellipse.drawEllipse(0, 0, 2, 2);
+  ellipse.endFill();
+  // ellipse.scale.set(0.8 + Math.random() * 0.3);
+  ellipse.x = Math.random() * 600;
+  ellipse.y = Math.random() * 600;
+  ellipse.direction = Math.random() * Math.PI * 2;
+  ellipse.turningSpeed = Math.random() - 0.8;
+  ellipse.speed = 2 + Math.random() * 2;
+  app.stage.addChild(ellipse);
+  particles.push(ellipse);
+
+  const line = new PIXI.Graphics();
+  app.stage.addChild(line);
+
+  line.position.set(mainStarX, mainStarY);
+
+  line.lineStyle(1, 0xffffff)
+   .moveTo(0, 0)
+   .lineTo(ellipse.x, ellipse.y);
+
+  lines.push(line);
+};
 
 //Background
 const backgroundImage = () => {
@@ -181,7 +254,7 @@ const audioEffect = () => {
   const randomSong = Math.floor(Math.random() * 6 + 1);
   const effectPlayer = new Tone.Player({
     url: `assets/audio/Sound${randomSong}.m4a`,
-    autostart: true,
+    // autostart: true,
   });
 
   effectPlayer.toMaster();
@@ -193,7 +266,7 @@ let backgroundPlayer;
 const backgroundAudio = () => {
   backgroundPlayer = new Tone.Player({
     url: `assets/audio/Main_song.m4a`,
-    autostart: true,
+    // autostart: true,
     loop: true,
   });
   backgroundPlayer.toMaster();
