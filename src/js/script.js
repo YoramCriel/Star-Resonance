@@ -20,7 +20,7 @@ const init = () => {
 };
 
 const circleOuterBoxCollision = () => {
-  const ellipseBoundsPadding = 100; //collision kader instellen
+  const ellipseBoundsPadding = 100; //collision kader instellen (Het volledige canvas)
   const ellipseBounds = new PIXI.Rectangle(- ellipseBoundsPadding,
                                     - ellipseBoundsPadding,
                                     app.renderer.width + ellipseBoundsPadding * 2,
