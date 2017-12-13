@@ -42,10 +42,9 @@ const circleOuterBoxCollision = () => {
     - ellipseBoundsPadding,
     app.renderer.width + ellipseBoundsPadding * 2,
     app.renderer.height + ellipseBoundsPadding * 2);
-  console.log(`circleOuterBox`);
-  console.log(`ellipses:`, ellipses);
 
   // let c = 0;
+  console.log(lines);
 
   app.ticker.add(() => {
     // c ++;
@@ -68,20 +67,23 @@ const circleOuterBoxCollision = () => {
       ellipse.y += Math.cos(ellipse.direction) * ellipse.speed;
       ellipse.rotation = - ellipse.direction - Math.PI / 2;
 
-      for (let y = 0;y < lines.length;y ++) {
+      for (let y = 0;y < particles.length;y ++) {
         const particle = particles[y];
         particle.direction += particle.turningSpeed * 0.1;
         particle.x += Math.sin(particle.direction) * particle.speed;
         particle.y += Math.cos(particle.direction) * particle.speed;
 
         const line = lines[y];
-        // line.moveTo(particle.x, particle.y);
-        // line.lineTo(particle.x, particle.y);
+        line.clear();
+        line.lineStyle(1, 0xffffff);
+        line.moveTo(ellipse.x, ellipse.y);
+        line.lineTo(particle.x, particle.y);
         // line.position.set(particle.x, particle.y);
         // line.moveTo(particle.x, particle.y);
-        // line.lineTo(ellipse.x, ellipse.y);
-        line.x = ellipse.x;
-        line.y = ellipse.y;
+        // line.lineTo(particle.x, particle.y);
+        // line.lineTo(particle.x, particle.y);
+        // line.x = ellipse.x;
+        // line.y = ellipse.y;
       }
 
       // console.log(`ellipse.x, ellipse.y:`, ellipse.x, ellipse.y);
@@ -179,10 +181,12 @@ const drawParticle = (mainStarX, mainStarY) => {
   app.stage.addChild(ellipse);
   particles.push(ellipse);
 
+  console.log(mainStarX, mainStarY);
+
   const line = new PIXI.Graphics();
   app.stage.addChild(line);
 
-  line.position.set(mainStarX, mainStarY);
+  //line.position.set(mainStarX, mainStarY);
 
   line.lineStyle(1, 0xffffff)
    .moveTo(0, 0)
@@ -254,7 +258,7 @@ const audioEffect = () => {
   const randomSong = Math.floor(Math.random() * 6 + 1);
   const effectPlayer = new Tone.Player({
     url: `assets/audio/Sound${randomSong}.m4a`,
-    // autostart: true,
+    autostart: true,
   });
 
   effectPlayer.toMaster();
@@ -266,7 +270,7 @@ let backgroundPlayer;
 const backgroundAudio = () => {
   backgroundPlayer = new Tone.Player({
     url: `assets/audio/Main_song.m4a`,
-    // autostart: true,
+    autostart: true,
     loop: true,
   });
   backgroundPlayer.toMaster();
