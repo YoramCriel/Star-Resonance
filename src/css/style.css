@@ -18,11 +18,3 @@ body {
 ::-webkit-scrollbar-button {
   display: none;
 }
-
-header {
-  /*margin: 2rem 0;*/
-}
-
-h1 {
-  font-size: 3rem;
-}
