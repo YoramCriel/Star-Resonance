@@ -18,6 +18,8 @@ const meteorLines = [];
 //tone
 let vol;
 let bgMusic;
+let connectSound;
+let pullSound;
 const highestVol = 20;
 const lowestVol = 2;
 
@@ -42,6 +44,7 @@ const createElements = () => {
 
   createBackground();
   createBgMusic();
+  loadSoundFiles();
   createStar();
 
   for (let i = 0;i < 15;i ++) {
@@ -108,6 +111,19 @@ const createBgMusic = () => {
   bgMusic.chain(vol, Tone.Master);
 };
 
+/* load files */
+const loadSoundFiles = () => {
+  connectSound = new Tone.Player({
+    url: `assets/audio/42095__fauxpress__bell-meditation.mp3`,
+  });
+  connectSound.toMaster();
+
+  pullSound = new Tone.Player({
+    url: `assets/audio/56364__suonho__ambienta-soundtrack-crystal-airlines-c4-100bpm.wav`
+  });
+  pullSound.toMaster();
+};
+
 /* #3 Star */
 const createStar = () => {
   star = PIXI.Sprite.fromImage(`assets/img/main-star.png`);
@@ -118,8 +134,16 @@ const createStar = () => {
   star.pressing = false;
   star.on(`mousedown`, () => {
     star.pressing = true;
+    if (pullSound && bgMusic) {
+      // pullSound.start();
+      // bgMusic.stop();
+    }
   });
   star.on(`mouseup`, () => {
+    // if (pullSound && bgMusic && Tone) {
+    //   pullSound.start();
+    //   bgMusic.stop();
+    // }
     star.pressing = false;
   });
   star.on(`pointerupoutside`, () => {
@@ -206,7 +230,11 @@ const animateStar = () => {
 
   const volX = Math.ceil(Math.max(lowestVol, Math.abs((distX / WIDTH)) * highestVol));
   const volY = Math.ceil(Math.max(lowestVol, Math.abs((distY / HEIGHT)) * highestVol));
-  vol.volume.value = Math.max(volX, volY);
+  const newVol = Math.max(volX, volY);
+
+  if (newVol <= highestVol) {
+    vol.volume.value = Math.max(volX, volY);
+  }
 
   star.x += distX * starEasing;
   star.y += distY * starEasing;
@@ -237,6 +265,11 @@ const animateMeteorLines = () => {
 /* #5 Pull and Push meteors */
 const animateConnectedMeteors = () => {
   if (star.pressing) {
+    // if (pullSound && bgMusic && Tone.BufferSource) {
+    //   pullSound.start();
+    //   bgMusic.stop();
+    // }
+
     for (let i = 0;i < connectedMeteors.length;i ++) {
       const meteor = connectedMeteors[i];
       const distX = star.x - meteor.x;
@@ -247,6 +280,11 @@ const animateConnectedMeteors = () => {
     }
 
   } else {
+    // if (pullSound && bgMusic && Tone.BufferSource) {
+    //   pullSound.stop();
+    //   bgMusic.start();
+    // }
+
     for (let i = 0;i < connectedMeteors.length;i ++) {
       const meteor = connectedMeteors[i];
       meteor.directionX += meteor.turningSpeed * 0.01;
@@ -276,6 +314,8 @@ const animateConnectedMeteors = () => {
 
 /* #2 Meteor Click */
 const onMeteorClick = ({currentTarget: tar, data}) => {
+  const time = connectSound.context.now();
+  connectSound.start(time, 1);
 
   meteors.forEach((m, i) => {
     if (m === tar) {
