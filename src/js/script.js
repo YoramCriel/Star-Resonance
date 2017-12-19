@@ -16,9 +16,11 @@ const meteorLines = [];
 let meteorsCalled = false;
 
 //Customizable
-const starEasing = 0.06;
+const starEasing = 0.04;
 const meteorEasing = 0.02;
 const deleteAt = 50;
+const pullAt =  5;
+const pullingSpeed = 0.02;
 
 //Initialize
 const init = () => {
@@ -34,12 +36,14 @@ const createElements = () => {
 
   createBackground();
   createStar();
+
   for (let i = 0;i < 15;i++) {
     const meteor = createMeteor({
       x: WIDTH + Math.random() * (WIDTH * 2),
       y: Math.random() * HEIGHT,
       color: 0xffffff,
-      alpha: 0.85
+      alpha: 0.85,
+      index: i
     });
     meteors.push(meteor);
   }
@@ -53,30 +57,14 @@ const draw = () => {
     createLine({from: mousePos, to: star, color: 0x440000});
 
     if (lines.length >= deleteAt) {
-      deleteElementFromArray({arr: lines, index: 0});
-      deleteElementFromArray({arr: particles, index: 0});
+      deleteElement({arr: lines, index: 0});
+      deleteElement({arr: particles, index: 0});
     }
 
     meteors.forEach(meteor => animateMeteor(meteor));
 
-    connectedMeteors.forEach((meteor, i) => {
-      const line = meteorLines[i];
-      line.clear();
-      line.lineStyle(1, 0xffee00);
-      line.moveTo(star.x, star.y);
-      line.lineTo(meteor.x, meteor.y);
-    });
-
-    if (meteorsCalled) {
-      for (let i = 0;i < connectedMeteors.length;i ++) {
-        const meteor = connectedMeteors[i];
-        const distX = star.x - meteor.x;
-        const distY = star.y - meteor.y;
-
-        meteor.x += distX * 0.03;
-        meteor.y += distY * 0.03;
-      }
-    }
+    animateMeteorLines();
+    animateConnectedMeteors();
   });
 };
 
@@ -104,11 +92,20 @@ const createBackground = () => {
 /* #3 Star */
 const createStar = () => {
   star = PIXI.Sprite.fromImage(`assets/img/main-star.png`);
-  star.x = 200;
-  star.y = 200;
+  star.x = 500;
+  star.y = 500;
   star.anchor.set(0.5);
   star.interactive = true;
-  star.on(`pointerdown`, onStarClick);
+  star.pressing = false;
+  star.on(`mousedown`, () => {
+    star.pressing = true;
+  });
+  star.on(`mouseup`, () => {
+    star.pressing = false;
+  });
+  star.on(`pointerupoutside`, () => {
+    star.pressing = false;
+  })
   app.stage.addChild(star);
 };
 
@@ -125,12 +122,19 @@ const createParticle = pos => {
 };
 
 /* #5 Line */
-const createLine = ({from: pos, to: endPos, color: color, meteorLine = false}) => {
+const createLine = ({
+  from: pos, to: endPos,
+  color: color,
+  meteorLine = false
+}) => {
   const line = new PIXI.Graphics();
+
   line.lineStyle(1, color)
    .moveTo(endPos.x, endPos.y)
    .lineTo(pos.x, pos.y);
+
   app.stage.addChild(line);
+
   if (meteorLine) {
     meteorLines.push(line);
   } else {
@@ -140,7 +144,13 @@ const createLine = ({from: pos, to: endPos, color: color, meteorLine = false}) =
 };
 
 /* #6 Meteor */
-const createMeteor = ({x: x, y: y, color: color, alpha: alpha}) => {
+const createMeteor = ({
+  x: x, y: y,
+  color: color,
+  alpha: alpha,
+  index: index,
+  connected = false
+}) => {
   const meteor = new PIXI.Graphics();
   meteor.beginFill(color, alpha);
   meteor.drawEllipse(0, 0, 7, 7);
@@ -148,11 +158,19 @@ const createMeteor = ({x: x, y: y, color: color, alpha: alpha}) => {
   //Out the screen on the right side
   meteor.x = x;
   meteor.y = y;
+  meteor.index = index;
+  meteor.directionX = Math.random() * Math.PI * 2;
+  meteor.directionY = Math.random() * Math.PI * 2;
+  meteor.turningSpeed = Math.random() - 0.8;
+  meteor.speed = 2 + Math.random() * 2;
   app.stage.addChild(meteor);
 
-  meteor.interactive = true;
-  meteor.on(`mouseover`, onMeteorHover);
-  meteor.on(`pointerdown`, onMeteorClick);
+  if (!connected) {
+    meteor.interactive = true;
+    meteor.on(`mouseover`, onMeteorHover);
+    meteor.on(`pointerdown`, onMeteorClick);
+  }
+
   return meteor;
 };
 
@@ -181,32 +199,76 @@ const animateMeteor = meteor => {
   }
 };
 
+/* #4 Lines */
+const animateMeteorLines = () => {
+  meteorLines.forEach((line, i) => {
+    const meteor = connectedMeteors[i];
+
+    line.clear();
+    line.lineStyle(1, 0xffee00);
+    line.moveTo(star.x, star.y);
+    line.lineTo(meteor.x, meteor.y);
+  });
+};
+
+/* #5 Pull and Push meteors */
+const animateConnectedMeteors = () => {
+  if (star.pressing) {
+    for (let i = 0;i < connectedMeteors.length;i ++) {
+      const meteor = connectedMeteors[i];
+      const distX = star.x - meteor.x;
+      const distY = star.y - meteor.y;
+
+      meteor.x += distX * pullingSpeed;
+      meteor.y += distY * pullingSpeed;
+    }
+
+  } else {
+    for (let i = 0;i < connectedMeteors.length;i ++) {
+      const meteor = connectedMeteors[i];
+      meteor.directionX += meteor.turningSpeed * 0.01;
+      meteor.directionY += meteor.turningSpeed * 0.01;
+      meteor.x += Math.sin(meteor.directionX) * meteor.speed;
+      meteor.y += Math.cos(meteor.directionY) * meteor.speed;
+    }
+  }
+
+};
+
 /* ===== EVENTS ===== */
 /* #1 Meteor Hover */
 const onMeteorHover = ({data}) => {
-  const meteor = createMeteor({
-    x: data.global.x,
-    y: data.global.y,
-    color: 0xffee00,
-    alpha: 0.3
-  });
-
-  hoverMeteors.push(meteor);
-  setTimeout(() => {
-    deleteElementFromArray({arr: hoverMeteors, index: 0});
-  }, 200);
+  // const meteor = createMeteor({
+  //   x: data.global.x,
+  //   y: data.global.y,
+  //   color: 0xffee00,
+  //   alpha: 0.3
+  // });
+  //
+  // hoverMeteors.push(meteor);
+  // setTimeout(() => {
+  //   deleteElement({arr: hoverMeteors, index: 0});
+  // }, 200);
 };
 
 /* #2 Meteor Click */
-const onMeteorClick = (e) => {
-  console.log(e.currentTarget);
-  const {data} = e;
+const onMeteorClick = ({currentTarget: tar, data}) => {
+
+  meteors.forEach((m, i) => {
+    if (m === tar) {
+      meteors.splice(i, 1);
+      app.stage.removeChild(tar);
+    }
+  });
+
   const meteor = createMeteor({
     x: data.global.x,
     y: data.global.y,
     color: 0xDC143C,
-    alpha: 1
+    alpha: 1,
+    connected: true
   });
+
   connectedMeteors.push(meteor);
 
   const line = createLine({
@@ -215,27 +277,6 @@ const onMeteorClick = (e) => {
     color: 0xffee00,
     meteorLine: true
   });
-  meteorsCalled = true;
-  meteorLines.push(line);
-};
-
-/* #3 Star Click */
-const onStarClick = ({data}) => {
-  // meteorsCalled = true;
-  if (connectedMeteors.length > 0) {
-    meteorsCalled = true;
-    // app.ticker.add(() => {
-    //   for (let i = 0;i < connectedMeteors.length;i ++) {
-    //     const meteor = connectedMeteors[i];
-    //     const distX = star.x - meteor.x;
-    //     const distY = star.y - meteor.y;
-    //
-    //     meteor.x += distX * 0.03;
-    //     meteor.y += distY * 0.03;
-    //   }
-    // });
-
-  }
 };
 
 /* ===== ACTIONS ===== */
@@ -243,7 +284,7 @@ const getMousePosition = () => {
   return app.renderer.plugins.interaction.mouse.global;
 };
 
-const deleteElementFromArray = ({arr = [], index = 0}) => {
+const deleteElement = ({arr = [], index = 0}) => {
   app.stage.removeChild(arr[index]);
   arr.splice(index, 1);
 };
