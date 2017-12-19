@@ -1,5 +1,5 @@
-/* eslint-disable */
 const PIXI = require(`pixi.js`);
+const Tone = require(`tone`);
 
 //Global
 let app;
@@ -10,16 +10,22 @@ let WIDTH, HEIGHT;
 const particles = [];
 const lines = [];
 const meteors = [];
-const hoverMeteors = [];
+// const hoverMeteors = [];
 const connectedMeteors = [];
 const meteorLines = [];
-let meteorsCalled = false;
+// let meteorsCalled = false;
+
+//tone
+let vol;
+let bgMusic;
+const highestVol = 20;
+const lowestVol = 2;
 
 //Customizable
 const starEasing = 0.04;
-const meteorEasing = 0.02;
+// const meteorEasing = 0.02;
 const deleteAt = 50;
-const pullAt =  5;
+// const pullAt =  5;
 const pullingSpeed = 0.02;
 
 //Initialize
@@ -35,9 +41,10 @@ const createElements = () => {
   mousePos = getMousePosition();
 
   createBackground();
+  createBgMusic();
   createStar();
 
-  for (let i = 0;i < 15;i++) {
+  for (let i = 0;i < 15;i ++) {
     const meteor = createMeteor({
       x: WIDTH + Math.random() * (WIDTH * 2),
       y: Math.random() * HEIGHT,
@@ -89,6 +96,18 @@ const createBackground = () => {
   app.stage.addChild(bg);
 };
 
+/* #2.5 Background music */
+const createBgMusic = () => {
+  bgMusic = new Tone.Player({
+    url: `assets/audio/139050__anankalisto__resonance-of-the-gods.wav`,
+    loop: true,
+    autostart: true
+  });
+  bgMusic.toMaster();
+  vol = new Tone.Volume(lowestVol);
+  bgMusic.chain(vol, Tone.Master);
+};
+
 /* #3 Star */
 const createStar = () => {
   star = PIXI.Sprite.fromImage(`assets/img/main-star.png`);
@@ -105,7 +124,7 @@ const createStar = () => {
   });
   star.on(`pointerupoutside`, () => {
     star.pressing = false;
-  })
+  });
   app.stage.addChild(star);
 };
 
@@ -167,7 +186,7 @@ const createMeteor = ({
 
   if (!connected) {
     meteor.interactive = true;
-    meteor.on(`mouseover`, onMeteorHover);
+    // meteor.on(`mouseover`, onMeteorHover);
     meteor.on(`pointerdown`, onMeteorClick);
   }
 
@@ -185,6 +204,10 @@ const animateStar = () => {
   const distX = mousePos.x - star.x;
   const distY = mousePos.y - star.y;
 
+  const volX = Math.ceil(Math.max(lowestVol, Math.abs((distX / WIDTH)) * highestVol));
+  const volY = Math.ceil(Math.max(lowestVol, Math.abs((distY / HEIGHT)) * highestVol));
+  vol.volume.value = Math.max(volX, volY);
+
   star.x += distX * starEasing;
   star.y += distY * starEasing;
 };
@@ -194,7 +217,7 @@ const animateMeteor = meteor => {
   meteor.x -= 0.8 + Math.random() * 0.9;
   meteor.turningSpeed = Math.random() - 0.2;
 
-  if (meteor.x < -10) {
+  if (meteor.x < - 10) {
     meteor.x = WIDTH + Math.random() * (WIDTH * 2);
   }
 };
@@ -237,7 +260,7 @@ const animateConnectedMeteors = () => {
 
 /* ===== EVENTS ===== */
 /* #1 Meteor Hover */
-const onMeteorHover = ({data}) => {
+// const onMeteorHover = ({data}) => {
   // const meteor = createMeteor({
   //   x: data.global.x,
   //   y: data.global.y,
@@ -249,7 +272,7 @@ const onMeteorHover = ({data}) => {
   // setTimeout(() => {
   //   deleteElement({arr: hoverMeteors, index: 0});
   // }, 200);
-};
+// };
 
 /* #2 Meteor Click */
 const onMeteorClick = ({currentTarget: tar, data}) => {
@@ -271,7 +294,7 @@ const onMeteorClick = ({currentTarget: tar, data}) => {
 
   connectedMeteors.push(meteor);
 
-  const line = createLine({
+  createLine({
     from: data.global,
     to: star,
     color: 0xffee00,
