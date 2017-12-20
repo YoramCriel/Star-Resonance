@@ -13,7 +13,12 @@ const meteors = [];
 // const hoverMeteors = [];
 const connectedMeteors = [];
 const meteorLines = [];
-// let meteorsCalled = false;
+let startApp = false;
+let secondStep = false;
+let thirdStep = false;
+let fourthStep = false;
+let allConnected = false;
+let startPulling = false;
 
 //tone
 let vol;
@@ -29,12 +34,100 @@ const starEasing = 0.04;
 const deleteAt = 50;
 // const pullAt =  5;
 const pullingSpeed = 0.02;
+const timeInterval = 100;
 
 //Initialize
 const init = () => {
   setupApp();
   createElements();
+  beforeStarting();
   draw();
+};
+
+const beforeStarting = () => {
+  const rect = new PIXI.Graphics();
+  rect.beginFill(0x000000, 0.6);
+  rect.drawRect(0, 0, WIDTH, HEIGHT);
+
+  const blurFilter = new PIXI.filters.BlurFilter(20);
+  rect.filters = [blurFilter];
+  app.stage.addChild(rect);
+
+  const style = new PIXI.TextStyle({
+    fontFamily: `Verdana`,
+    fontSize: 36,
+    letterSpacing: 2,
+    fontWeight: `lighter`,
+    fill: `#ffffff`
+  });
+
+  const title = new PIXI.Text(`Star Resonance`, style);
+  title.anchor.set(0.5);
+  title.x = WIDTH / 2;
+  title.y = HEIGHT / 3;
+  app.stage.addChild(title);
+
+  const subtitleStyle = new PIXI.TextStyle({
+    fontFamily: `Verdana`,
+    fontSize: 20,
+    letterSpacing: 2,
+    fontWeight: `lighter`,
+    fill: `#ffffff`
+  });
+
+  const subtitle = new PIXI.Text(`Start`, subtitleStyle);
+  subtitle.anchor.set(0.5);
+  subtitle.x = WIDTH / 2;
+  subtitle.y = HEIGHT / 2 + 100;
+  subtitle.interactive = true;
+  subtitle.buttonMode = true;
+  subtitle.on(`pointerdown`, () => {
+    app.stage.removeChild(rect);
+    app.stage.removeChild(title);
+    app.stage.removeChild(subtitle);
+    startedTheApp();
+  });
+  app.stage.addChild(subtitle);
+};
+
+const startedTheApp = () => {
+  const text = createText(`Start moving`);
+  setTimeout(() => {
+    app.stage.addChild(text);
+  }, timeInterval);
+
+  setTimeout(() => {
+    startApp = true;
+  }, timeInterval * 3);
+
+  setTimeout(() => {
+    app.stage.removeChild(text);
+  }, timeInterval * 5);
+
+  const connectText = createText(`Connect the stars by clicking on them`);
+  setTimeout(() => {
+    app.stage.addChild(connectText);
+  }, timeInterval * 15);
+
+  setTimeout(() => {
+    secondStep = true;
+    app.stage.removeChild(connectText);
+  }, timeInterval * 20);
+};
+
+const createText = string => {
+  const style = new PIXI.TextStyle({
+    fontFamily: `Verdana`,
+    fontSize: 20,
+    letterSpacing: 2,
+    fontWeight: `lighter`,
+    fill: `#ffffff`
+  });
+  const text = new PIXI.Text(string, style);
+  text.x = WIDTH / 2;
+  text.y = HEIGHT / 3;
+  text.anchor.set(0.5);
+  return text;
 };
 
 const createElements = () => {
@@ -62,6 +155,8 @@ const createElements = () => {
 const draw = () => {
   app.ticker.add(() => {
     animateBackground();
+
+    if (!startApp) return;
     animateStar();
     createParticle(mousePos);
     createLine({from: mousePos, to: star, color: 0x440000});
@@ -71,8 +166,11 @@ const draw = () => {
       deleteElement({arr: particles, index: 0});
     }
 
+    if (!secondStep) return;
+    if (meteors.length < 1) {
+      allConnected = true;
+    }
     meteors.forEach(meteor => animateMeteor(meteor));
-
     animateMeteorLines();
     animateConnectedMeteors();
   });
@@ -106,6 +204,7 @@ const createBgMusic = () => {
     loop: true,
     autostart: true
   });
+
   bgMusic.toMaster();
   vol = new Tone.Volume(lowestVol);
   bgMusic.chain(vol, Tone.Master);
@@ -127,23 +226,16 @@ const loadSoundFiles = () => {
 /* #3 Star */
 const createStar = () => {
   star = PIXI.Sprite.fromImage(`assets/img/main-star.png`);
-  star.x = 500;
-  star.y = 500;
+  star.x = WIDTH / 2;
+  star.y = HEIGHT / 2;
   star.anchor.set(0.5);
   star.interactive = true;
   star.pressing = false;
   star.on(`mousedown`, () => {
+    if (allConnected) startPulling = true;
     star.pressing = true;
-    if (pullSound && bgMusic) {
-      // pullSound.start();
-      // bgMusic.stop();
-    }
   });
   star.on(`mouseup`, () => {
-    // if (pullSound && bgMusic && Tone) {
-    //   pullSound.start();
-    //   bgMusic.stop();
-    // }
     star.pressing = false;
   });
   star.on(`pointerupoutside`, () => {
@@ -198,12 +290,11 @@ const createMeteor = ({
   meteor.beginFill(color, alpha);
   meteor.drawEllipse(0, 0, 7, 7);
   meteor.endFill();
-  //Out the screen on the right side
   meteor.x = x;
   meteor.y = y;
   meteor.index = index;
-  meteor.directionX = Math.random() * Math.PI * 2;
-  meteor.directionY = Math.random() * Math.PI * 2;
+  meteor.stuck = false;
+  meteor.direction = Math.random() * Math.PI * 2;
   meteor.turningSpeed = Math.random() - 0.8;
   meteor.speed = 2 + Math.random() * 2;
   app.stage.addChild(meteor);
@@ -264,35 +355,82 @@ const animateMeteorLines = () => {
 
 /* #5 Pull and Push meteors */
 const animateConnectedMeteors = () => {
-  if (star.pressing) {
-    // if (pullSound && bgMusic && Tone.BufferSource) {
-    //   pullSound.start();
-    //   bgMusic.stop();
-    // }
-
-    for (let i = 0;i < connectedMeteors.length;i ++) {
-      const meteor = connectedMeteors[i];
+  if (startPulling) {
+    connectedMeteors.forEach((meteor, i) => {
       const distX = star.x - meteor.x;
       const distY = star.y - meteor.y;
 
-      meteor.x += distX * pullingSpeed;
-      meteor.y += distY * pullingSpeed;
-    }
+      if (Math.abs(distX) < 2 && Math.abs(distY) < 2) {
+        meteor.x += Math.sin(meteor.direction) * 10;
+        meteor.y += Math.cos(meteor.direction) * 10;
+        deleteElement({arr: meteorLines, index: i});
+      } else {
+        meteor.x += distX * pullingSpeed;
+        meteor.y += distY * pullingSpeed;
+      }
+    });
+    // return;
+  }
+  // connectedMeteors.forEach((meteor, i) => {
+  connectedMeteors.forEach(meteor => {
+    const distX = star.x - meteor.x;
+    const distY = star.y - meteor.y;
 
-  } else {
-    // if (pullSound && bgMusic && Tone.BufferSource) {
-    //   pullSound.stop();
-    //   bgMusic.start();
+    // if (startPulling) {
+    //   meteor.x += distX * pullingSpeed;
+    //   meteor.y += distY * pullingSpeed;
+    //
+    //   if (Math.abs(distX) < 2 && Math.abs(distY) < 2) {
+    //     meteor.x += Math.sin(meteor.direction) * 10;
+    //     meteor.y += Math.cos(meteor.direction) * 10;
+    //     deleteElement({arr: meteorLines, index: i});
+    //   }
     // }
 
-    for (let i = 0;i < connectedMeteors.length;i ++) {
-      const meteor = connectedMeteors[i];
-      meteor.directionX += meteor.turningSpeed * 0.01;
-      meteor.directionY += meteor.turningSpeed * 0.01;
-      meteor.x += Math.sin(meteor.directionX) * meteor.speed;
-      meteor.y += Math.cos(meteor.directionY) * meteor.speed;
+    if (!startPulling) {
+      if (star.pressing) {
+        meteor.x += distX * pullingSpeed;
+        meteor.y += distY * pullingSpeed;
+      } else {
+        meteor.direction += meteor.turningSpeed * 0.01;
+        meteor.x += Math.sin(meteor.direction) * meteor.speed;
+        meteor.y += Math.cos(meteor.direction) * meteor.speed;
+      }
     }
-  }
+
+
+  });
+
+  // if (star.pressing) {
+  //   console.log(`pressed`);
+  //   // if (pullSound && bgMusic && Tone.BufferSource) {
+  //   // pullSound.start();
+  //   // bgMusic.stop();
+  //   // }
+  //
+  //   for (let i = 0;i < connectedMeteors.length;i ++) {
+  //     const meteor = connectedMeteors[i];
+  //     const distX = star.x - meteor.x;
+  //     const distY = star.y - meteor.y;
+  //
+  //     meteor.x += distX * pullingSpeed;
+  //     meteor.y += distY * pullingSpeed;
+  //   }
+  //
+  // } else {
+  //   // if (pullSound && bgMusic && Tone.BufferSource) {
+  //   //   pullSound.stop();
+  //   //   bgMusic.start();
+  //   // }
+  //
+  //   for (let i = 0;i < connectedMeteors.length;i ++) {
+  //     const meteor = connectedMeteors[i];
+  //     meteor.directionX += meteor.turningSpeed * 0.01;
+  //     meteor.directionY += meteor.turningSpeed * 0.01;
+  //     meteor.x += Math.sin(meteor.directionX) * meteor.speed;
+  //     meteor.y += Math.cos(meteor.directionY) * meteor.speed;
+  //   }
+  // }
 
 };
 
@@ -314,6 +452,25 @@ const animateConnectedMeteors = () => {
 
 /* #2 Meteor Click */
 const onMeteorClick = ({currentTarget: tar, data}) => {
+  if (connectedMeteors.length > 1 && !thirdStep) {
+    const pullText = createText(`Hold the main star to pull the other stars`);
+    app.stage.addChild(pullText);
+
+    setTimeout(() => {
+      app.stage.removeChild(pullText);
+      thirdStep = true;
+    }, timeInterval * 5);
+  }
+
+  if (connectedMeteors.length > 4 && !fourthStep && thirdStep) {
+    const pullText = createText(`Connect all the stars`);
+    app.stage.addChild(pullText);
+
+    setTimeout(() => {
+      fourthStep = true;
+      app.stage.removeChild(pullText);
+    }, timeInterval * 5);
+  }
   const time = connectSound.context.now();
   connectSound.start(time, 1);
 
