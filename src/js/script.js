@@ -34,7 +34,7 @@ const starEasing = 0.04;
 const deleteAt = 50;
 // const pullAt =  5;
 const pullingSpeed = 0.02;
-const timeInterval = 100;
+const timeInterval = 1000;
 
 //Initialize
 const init = () => {
