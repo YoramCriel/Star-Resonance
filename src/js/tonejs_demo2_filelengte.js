@@ -4,12 +4,14 @@ const Tone = require(`tone`);
 const init = () => {
   console.log(`test`);
   backgroundAudio();
+  window.addEventListener(`mousedown`, downHandler);
+  window.addEventListener(`mouseup`, upHandler);
 };
 
 let backgroundPlayer;
 const backgroundAudio = () => {
   backgroundPlayer = new Tone.Player({
-    url: `assets/audio/Main_song.m4a`,
+    url: `assets/_audio/Main_song.m4a`,
     autostart: true,
     loop: true,
   });
@@ -31,6 +33,13 @@ const draw = () => {
   requestAnimationFrame(draw);
 }
 
+const downHandler = () => {
+  backgroundPlayer.stop();
+}
 
+const upHandler = () => {
+  let time = backgroundPlayer.context.currentTime;
+  backgroundPlayer.start(time, time+50);
+}
 
 init();

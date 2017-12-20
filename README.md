@@ -1,50 +1,36 @@
 # Star Resonance
 
 
-WAT?
+###What?
 
 Echo of connecting stars.
 
-Experiment met het tekenen van lijn particles.
-Het zijn groepen sterren die met elkaar verbonden zijn, deze sterren zweven
-in de oneindigheid van de ruimte.
+This is an experiment with particles that represent stars in the endlessness of space.
+Connect the stars to the main star to create cool sound effects.
 
 -------------------------------------------
 
-WERKING:
+###How does it work:
 
-1. Lijngroepen:
+1. Main star:
 
-Bij het indrukken van de muis word een groep lijnen getekend.
-Al deze lijnen hebben een random kleur. Er zijn 3 random kleuren beschikbaar per groep lijnnen.
-Wanneer de muis wordt losgelaten worden er geen lijn particles meer getekend.
-Elke groep lijnen zweeft in een bepaalde richting aan een bepaalde snelheid.
-Deze richting en snelheid wordt bepaald door de richting en snelheid van de muiscursor tijdens het indrukken.
-De lijnen zullen zich in tegengestelde richting van de muiscursor bewegen,
-m.a.w. waneer de muis naar links wordt bewogen, zullen de lijnen naar rechts bewegen.
-Wanneer de muis opnieuw wordt ingedrukt dan wordt er een nieuwe groep lijnen getekend,
-dit met opnieuw 3 random kleuren, een snelheid en een richting.
+The main star controls everything. Move this main star to a star particle and press on it. This creates a connection by drawing a line between the main star and the star particle.
+When the main star is pressed all star particles are pulled towards it. A long press
+removes the star particles from the main star. A sound is played to confirm the removal
+of the star particles.
 
-2. Het botsen:
 
-Wanneer de groepen met elkaar in contact komen, de lijnen kruisen elkaar zal
-er een geluidssignaal/effect ontstaan die afhankelijk is van de
-snelheid waarmee deze lijnen elkaar kruisen.
+2. The main stars tail:
 
-Zie de visuele voorstelling in de map concept.
+The tail consist out of lines and circle particles. By moving the main star faster the tail gets long and the background volume increases when slowing down the opposite happens. These particles interact with the star and the line particles. When they collide a sound effect is played. This effect depends on the fact they collided with a star or line.
 
-3. Overige extra functionaliteiten:
+3. The star particles:
 
-Wij overwegen de lijnen in een 3d context weer te geven.
-Verder willen we er ook voor zorgen dat de lijngroepen
-vanop afstand kunnen worden getekend, dit doormiddel van een telefoon.
-Ook willen we de mogelijkheid bieden om de lijndikte en het
-aantal particles aan te passen.
+Star particles appear randomly on right side of the screen, the can be connected to the main star by pressing on them with the main star. When stars collide with each other, the tail of the main star or there is collision between the lines a sound effect will be played. More stars means that more stars can collide and this means better and cooler sound effects.
 
 -------------------------------------------
 
-Technologieën:
+###Technologies:
 
 - webGL (pixiJS)
-- Websockets
 - Web Audio (tone.js)
