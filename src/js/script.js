@@ -47,7 +47,7 @@ const createElements = () => {
   loadSoundFiles();
   createStar();
 
-  for (let i = 0;i < 15;i ++) {
+  for (let i = 0;i < 30;i ++) {
     const meteor = createMeteor({
       x: WIDTH + Math.random() * (WIDTH * 2),
       y: Math.random() * HEIGHT,
