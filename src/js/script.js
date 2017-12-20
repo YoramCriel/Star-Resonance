@@ -364,6 +364,8 @@ const animateConnectedMeteors = () => {
         meteor.x += Math.sin(meteor.direction) * 10;
         meteor.y += Math.cos(meteor.direction) * 10;
         deleteElement({arr: meteorLines, index: i});
+        star.scale.set(2);
+        deleteElement({arr: connectedMeteors, index: i});
       } else {
         meteor.x += distX * pullingSpeed;
         meteor.y += distY * pullingSpeed;
